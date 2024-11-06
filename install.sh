@@ -53,29 +53,6 @@ if [ -f /etc/os-release ]; then
     if [ "${UPSTREAM_ID}" != "debian" ] && [ "${UPSTREAM_ID}" != "ubuntu" ]; then
         UPSTREAM_ID="$(echo ${ID_LIKE,,} | sed s/\"//g | cut -d' ' -f1)"
     fi
-
-
-elif type lsb_release >/dev/null 2>&1; then
-    # linuxbase.org
-    OS=$(lsb_release -si)
-    VER=$(lsb_release -sr)
-elif [ -f /etc/lsb-release ]; then
-    # For some versions of Debian/Ubuntu without lsb_release command
-    . /etc/lsb-release
-    OS=$DISTRIB_ID
-    VER=$DISTRIB_RELEASE
-elif [ -f /etc/debian_version ]; then
-    # Older Debian/Ubuntu/etc.
-    OS=Debian
-    VER=$(cat /etc/debian_version)
-elif [ -f /etc/SuSe-release ]; then
-    # Older SuSE/etc.
-    OS=SuSE
-    VER=$(cat /etc/SuSe-release)
-elif [ -f /etc/redhat-release ]; then
-    # Older Red Hat, CentOS, etc.
-    OS=RedHat
-    VER=$(cat /etc/redhat-release)
 else
     # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
     OS=$(uname -s)
@@ -89,41 +66,6 @@ if [ "$DEBUG" = "true" ]; then
     echo "VER: $VER"
     echo "UPSTREAM_ID: $UPSTREAM_ID"
     exit 0
-fi
-
-# Setup prereqs for server
-# common named prereqs
-PREREQ="curl wget unzip tar"
-PREREQDEB="dnsutils"
-PREREQRPM="bind-utils"
-PREREQARCH="bind"
-
-echo "Installing prerequisites"
-if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
-    sudo apt-get update
-    sudo apt-get install -y  ${PREREQ} ${PREREQDEB} # git
-elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhel" ] ; then
-# opensuse 15.4 fails to run the relay service and hangs waiting for it
-# needs more work before it can be enabled
-# || [ "${UPSTREAM_ID}" = "suse" ]
-    sudo yum update -y
-    sudo yum install -y  ${PREREQ} ${PREREQRPM} # git
-elif [ "${ID}" = "arch" ] || [ "${UPSTREAM_ID}" = "arch" ]; then
-    sudo pacman -Syu
-    sudo pacman -S ${PREREQ} ${PREREQARCH}
-else
-    echo "Unsupported OS"
-    # give them the option to continue
-    echo -n "Would you like to continue? Dependencies may not be satisfied... [y/n] "
-    read continue_no_dependencies
-    if [ $continue_no_dependencies == "y" ]; then
-        echo "Continuing..."
-    elif [ $continue_no_dependencies != "n" ]; then
-        echo "Invalid answer, exiting."
-	exit 1
-    else
-        exit 1
-    fi
 fi
 
 # Choice for DNS or IP
