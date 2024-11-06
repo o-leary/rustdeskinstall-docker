@@ -11,3 +11,12 @@ services:
       - 8000
       - 21116/udp
     restart: unless-stopped
+    secrets:
+      - http_user
+      - http_pass
+
+secrets:
+  http_user:
+    file: ./http_user.txt
+  http_pass:
+    file: ./http_pass.txt
