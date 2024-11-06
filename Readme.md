@@ -1,55 +1,19 @@
-# Rustdesk server Install Script
-Easy install Script for Rustdesk on linux, should work on any 64bit (32bit arm will install rustdesk server only) debian or centos based system supporting systemd.<br>
+# Rustdesk server Docker Install
+Easy install for Rustdesk in ubuntu docker container. Based on the great work of techahold: https://github.com/techahold/rustdeskinstall. This includes the gohttp server with preconfigured install scripts for clients.<br>
 For Rustdesk visit https://rustdesk.com
 
-You can use Hetzner to test this with a $20 credit using this referal code https://hetzner.cloud/?ref=p6iUr7jEXmoB
-
-We provide professional hosting and support for RustDesk OSS and RustDesk Pro, please email hello@techahold.com if you need assistance.
-
-# How to Install the server
-Please setup your firewall on your server prior to running the script.
-
-Make sure you have got access via ssh or otherwise setup prior setting up the firewall, command for UFW is:
+#Install
+Forward the following ports to your docker host (you only need port 8000 if you are using the preconfigured install files):
 ```
-ufw allow proto tcp from YOURIP to any port 22
+21115:21119/tcp
+8000/tcp
+21116/udp
 ```
-
-If you have UFW installed use the following commands (you only need port 8000 if you are using the preconfigured install files):
+Clone or download this repo and edit the http_user.txt and http_pass.txt files then:
 ```
-ufw allow 21115:21119/tcp
-ufw allow 8000/tcp
-ufw allow 21116/udp
-sudo ufw enable
+docker compose up -d
 ```
-
-Run the following commands:
-```
-wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/install.sh
-chmod +x install.sh
-./install.sh
-```
-
-Choose your preferences from the options given in the script.
-
-***Please Note:***
-If you allow the script to create preconfigured install files (with your IP/DNS and key set) it will install gohttpserver using port 8000 for you to easily download the install scripts.
+If you'd rather not use docker secret files remove the secrets sections in the docker-compose.yml file and hardcode them in entrypoint.sh.
 
 # How to update the server
-
-Run the following commands:
-```
-wget https://raw.githubusercontent.com/techahold/rustdeskinstall/master/update.sh
-chmod +x update.sh
-./update.sh
-```
-
-# Rustdesk windows powershell install script
-Generates a powershell script for install grabbing WAN IP and Key currently in /opt/rustdesk but will be moved to a web url for easy deployment.
-
-# Tips
-
-If you want to restart the services use the following commands:
-```
-sudo systemctl restart rustdesksignal
-sudo systemctl restart rustdeskrelay
-```
+The update script has not been tested in this environment and is highly unlikely to work.
