@@ -3,7 +3,7 @@ Easy install for Rustdesk in ubuntu docker container. Based on the great work of
 For Rustdesk visit https://rustdesk.com
 
 # Install
-Forward the following ports to your docker host (you only need port 8000 if you are using the preconfigured install files):
+Forward the following ports to your docker host:
 ```
 21115:21119/tcp
 8000/tcp
