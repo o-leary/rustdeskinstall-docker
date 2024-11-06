@@ -1,0 +1,13 @@
+services:
+  rustdeskserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rustdeskserver
+    stdin_open: true
+    tty: true
+    ports:
+      - 21115-21119:21115-21119
+      - 8000
+      - 21116/udp
+    restart: unless-stopped
