@@ -10,6 +10,9 @@ services:
       - 21115-21119:21115-21119
       - 8000
       - 21116/udp
+    volumes:
+      - rustdesk:/opt/rustdesk
+      - gohttp:/opt/gohttp
     restart: unless-stopped
     secrets:
       - http_user
