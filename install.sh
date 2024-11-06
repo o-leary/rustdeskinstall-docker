@@ -105,11 +105,7 @@ elif [[ -z "$resolveip" && ! -z "$resolvedns" ]]; then
     fi
 fi
 
-# Make Folder /opt/rustdesk/
-if [ ! -d "/opt/rustdesk" ]; then
-    echo "Creating /opt/rustdesk"
-    sudo mkdir -p /opt/rustdesk/
-fi
+# Set Folder Permissions /opt/rustdesk/, already exists as docker volume
 sudo chown "${uname}" -R /opt/rustdesk
 cd /opt/rustdesk/ || exit 1
 
@@ -185,12 +181,12 @@ function setuphttp () {
     sudo sed -i "s|secure-string|${string64rev}|g" linuxclientinstall.sh
 
     # Download and install gohttpserver
-    # Make Folder /opt/gohttp/
-    if [ ! -d "/opt/gohttp" ]; then
-        echo "Creating /opt/gohttp"
-        sudo mkdir -p /opt/gohttp/
-        sudo mkdir -p /opt/gohttp/public
+    # Make Folder /opt/gohttp/public, /opt/gohttp already exists as a docker volume
+    if [ ! -d "/opt/gohttp/public" ]; then
+        echo "Creating /opt/gohttp/public"
+        sudo mkdir -p /opt/gohttp/public/
     fi
+
     sudo chown "${uname}" -R /opt/gohttp
     cd /opt/gohttp
     GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
