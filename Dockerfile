@@ -3,7 +3,7 @@ FROM ubuntu:noble
 #ENV TZ="Pacific/Auckland"
 
 RUN apt-get update
-RUN apt-get install curl sudo nano wget unzip tar dnsutils --no-install-recommends -y
+RUN apt-get install curl sudo nano wget unzip tar dnsutils ca-certificates --no-install-recommends -y
 
 RUN mkdir /app
 COPY *.sh /app
