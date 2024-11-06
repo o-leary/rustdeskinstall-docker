@@ -8,9 +8,7 @@ RUN apt-get install curl sudo nano wget unzip tar dnsutils ca-certificates --no-
 RUN mkdir /app
 COPY *.sh /app
 COPY *.ps1 /app
-WORKDIR /app
-RUN chmod +x *.sh
-RUN ./install.sh --resolveip --install-http
+RUN chmod +x /app/*.sh
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
