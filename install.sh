@@ -201,61 +201,11 @@ if [ ! -d "/var/log/rustdesk" ]; then
 fi
 sudo chown "${uname}" -R /var/log/rustdesk/
 
-# Setup Systemd to launch hbbs
-rustdesksignal="$(cat << EOF
-[Unit]
-Description=Rustdesk Signal Server
-[Service]
-Type=simple
-LimitNOFILE=1000000
-ExecStart=/opt/rustdesk/hbbs
-WorkingDirectory=/opt/rustdesk/
-User=${uname}
-Group=${gname}
-Restart=always
-StandardOutput=append:/var/log/rustdesk/signalserver.log
-StandardError=append:/var/log/rustdesk/signalserver.error
-# Restart service after 10 seconds if node service crashes
-RestartSec=10
-[Install]
-WantedBy=multi-user.target
-EOF
-)"
-echo "${rustdesksignal}" | sudo tee /etc/systemd/system/rustdesksignal.service > /dev/null
-sudo systemctl daemon-reload
-sudo systemctl enable rustdesksignal.service
-sudo systemctl start rustdesksignal.service
+./hbbs &
+./hbbr &
 
-# Setup Systemd to launch hbbr
-rustdeskrelay="$(cat << EOF
-[Unit]
-Description=Rustdesk Relay Server
-[Service]
-Type=simple
-LimitNOFILE=1000000
-ExecStart=/opt/rustdesk/hbbr
-WorkingDirectory=/opt/rustdesk/
-User=${uname}
-Group=${gname}
-Restart=always
-StandardOutput=append:/var/log/rustdesk/relayserver.log
-StandardError=append:/var/log/rustdesk/relayserver.error
-# Restart service after 10 seconds if node service crashes
-RestartSec=10
-[Install]
-WantedBy=multi-user.target
-EOF
-)"
-echo "${rustdeskrelay}" | sudo tee /etc/systemd/system/rustdeskrelay.service > /dev/null
-sudo systemctl daemon-reload
-sudo systemctl enable rustdeskrelay.service
-sudo systemctl start rustdeskrelay.service
-
-while ! [[ $CHECK_RUSTDESK_READY ]]; do
-  CHECK_RUSTDESK_READY=$(sudo systemctl status rustdeskrelay.service | grep "Active: active (running)")
-  echo -ne "Rustdesk Relay not ready yet...${NC}\n"
-  sleep 3
-done
+echo "wait 10 seconds for relay start"
+sleep 10
 
 pubname=$(find /opt/rustdesk -name "*.pub")
 key=$(cat "${pubname}")
@@ -281,11 +231,11 @@ echo "$string64rev"
 
 function setuphttp () {
     # Create windows install script
-    wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
+    wget https://raw.githubusercontent.com/o-leary/rustdeskinstall-docker/master/WindowsAgentAIOInstall.ps1
     sudo sed -i "s|secure-string|${string64rev}|g" WindowsAgentAIOInstall.ps1
 
     # Create linux install script
-    wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/linuxclientinstall.sh
+    wget https://raw.githubusercontent.com/o-leary/rustdeskinstall-docker/master/linuxclientinstall.sh
     sudo sed -i "s|secure-string|${string64rev}|g" linuxclientinstall.sh
 
     # Download and install gohttpserver
@@ -332,31 +282,7 @@ function setuphttp () {
     fi
 
 
-    # Setup Systemd to launch Go HTTP Server
-    gohttpserver="$(cat << EOF
-[Unit]
-Description=Go HTTP Server
-[Service]
-Type=simple
-LimitNOFILE=1000000
-ExecStart=/opt/gohttp/gohttpserver -r ./public --port 8000 --auth-type http --auth-http admin:${admintoken}
-WorkingDirectory=/opt/gohttp/
-User=${uname}
-Group=${gname}
-Restart=always
-StandardOutput=append:/var/log/gohttp/gohttpserver.log
-StandardError=append:/var/log/gohttp/gohttpserver.error
-# Restart service after 10 seconds if node service crashes
-RestartSec=10
-[Install]
-WantedBy=multi-user.target
-EOF
-)"
-    echo "${gohttpserver}" | sudo tee /etc/systemd/system/gohttpserver.service > /dev/null
-    sudo systemctl daemon-reload
-    sudo systemctl enable gohttpserver.service
-    sudo systemctl start gohttpserver.service
-
+    ./gohttpserver -r ./public --port 8000 --auth-type http --auth-http admin:${admintoken}
 
     echo -e "Your IP/DNS Address is ${wanip}"
     echo -e "Your public key is ${key}"
