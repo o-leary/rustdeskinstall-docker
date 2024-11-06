@@ -229,6 +229,10 @@ string64rev=$(echo -n "$string64" | rev)
 
 echo "$string64rev"
 
+# We start these in entrypoint.sh
+killall hbbr
+killall hbbs
+
 function setuphttp () {
     # Create windows install script
     wget https://raw.githubusercontent.com/o-leary/rustdeskinstall-docker/master/WindowsAgentAIOInstall.ps1
@@ -280,9 +284,6 @@ function setuphttp () {
     elif [ "${ARCH}" = "armv7l" ] || [ "${ARCH}" =  "aarch64" ]; then
     rm gohttpserver_"${GOHTTPLATEST}"_linux_arm64.tar.gz
     fi
-
-
-    ./gohttpserver -r ./public --port 8000 --auth-type http --auth-http admin:${admintoken}
 
     echo -e "Your IP/DNS Address is ${wanip}"
     echo -e "Your public key is ${key}"
